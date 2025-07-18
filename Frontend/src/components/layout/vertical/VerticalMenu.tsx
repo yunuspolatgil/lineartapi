@@ -69,10 +69,11 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
         <MenuItem href='/home' icon={<i className='tabler-smart-home' />}>
-          Home
+          Anasayfa
         </MenuItem>
-        <MenuItem href='/about' icon={<i className='tabler-info-circle' />}>
-          About
+
+        <MenuItem href='/musteriler' icon={<i className='tabler-users' />}>
+          Müşteriler
         </MenuItem>
       </Menu>
       {/* <Menu
