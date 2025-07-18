@@ -27,22 +27,23 @@ export type CustomInputHorizontalData = {
     }
 )
 export type CustomInputHorizontalProps = {
-  name: string
-  color?: ThemeColor
-  gridProps?: GridProps
-  data: CustomInputHorizontalData
+  name: string,
+  color?: ThemeColor,
+  gridProps?: GridProps,
+  data: CustomInputHorizontalData,
+  sx?: { border: string; boxShadow: string | string; borderRadius: number; background: string }
 } & (
   | {
-      type: 'checkbox'
-      selected: string[]
-      handleChange: (value: string) => void
-    }
+  type: 'checkbox'
+  selected: string[]
+  handleChange: (value: string) => void
+}
   | {
-      type: 'radio'
-      selected: string
-      handleChange: (value: string | ChangeEvent<HTMLInputElement>) => void
-    }
-)
+  type: 'radio'
+  selected: string
+  handleChange: (value: string | ChangeEvent<HTMLInputElement>) => void
+}
+  )
 
 // Types of Vertical Custom Inputs
 export type CustomInputVerticalData = {

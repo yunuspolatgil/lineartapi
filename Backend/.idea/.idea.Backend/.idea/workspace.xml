@@ -10,27 +10,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="690626b8-38c8-4b8a-9269-ac146218585b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Migrations/20250718175435_CustoerEdit.Designer.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Migrations/20250718175435_CustoerEdit.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Backend/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Backend/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Backend.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Migrations/AppDbContextModelSnapshot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Migrations/AppDbContextModelSnapshot.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/Customer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/Customer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Backend.dll" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Backend.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Backend.exe" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Backend.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Backend.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Backend.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Backend.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Backend.AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Backend.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Backend.AssemblyInfoInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Backend.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Backend.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Backend.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Backend.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Backend.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Backend.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Backend.sourcelink.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Backend.sourcelink.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/apphost.exe" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/apphost.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/ref/Backend.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/ref/Backend.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/refint/Backend.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/refint/Backend.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmrazor.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmrazor.dswa.cache.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Frontend/src/app/(dashboard)/musteriler/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Frontend/src/app/(dashboard)/musteriler/api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Frontend/src/app/(dashboard)/musteriler/MusteriTablosu.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Frontend/src/components/common/CustomToast.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Frontend/src/@core/components/custom-inputs/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Frontend/src/@core/components/custom-inputs/types.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Frontend/src/app/(dashboard)/musteriler/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../Frontend/src/app/(dashboard)/musteriler/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Frontend/src/components/dialogs/musteri-ekle/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../Frontend/src/components/dialogs/musteri-ekle/index.tsx" afterDir="false" />
     </list>
@@ -80,7 +62,6 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "node.js.detected.package.eslint": "true",
@@ -152,7 +133,7 @@
       <option name="presentableId" value="Default" />
       <updated>1752850632199</updated>
       <workItem from="1752850633782" duration="4966000" />
-      <workItem from="1752857520993" duration="2961000" />
+      <workItem from="1752857520993" duration="3615000" />
     </task>
     <task id="LOCAL-00001" summary="Api ilk commit">
       <option name="closed" value="true" />

@@ -1,22 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
-  Typography,
   Button,
-  Snackbar,
-  Alert,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
+  Typography,
   useTheme,
+  Card,
+  CardContent,
+  Stack,
+  Divider,
+  CircularProgress
 } from "@mui/material";
-import AddEditAddress, { AddEditAddressData } from "@/components/dialogs/musteri-ekle";
+import AddIcon from "@mui/icons-material/Add";
+import MusteriTablosu from "./MusteriTablosu";
+import AddEditAddress from "@/components/dialogs/musteri-ekle";
+import CustomToast from "@/components/common/CustomToast";
 
 type Customer = {
   id: number;
@@ -28,37 +27,70 @@ type Customer = {
   companyName?: string;
 };
 
+const STORAGE_KEY = "musteri-listesi";
+
 const MusterilerPage = () => {
   const theme = useTheme();
 
-  // CRUD state
-  const [customers, setCustomers] = useState<Customer[]>([
-    {
-      id: 1,
-      name: "Yunis",
-      surname: "Polatgil",
-      email: "jejuwoodamz@gmail.com",
-      phone: "05307947958",
-      type: "bireysel",
-    },
-  ]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | undefined>();
-  const [notif, setNotif] = useState({ open: false, message: "", severity: "success" });
+  const [toast, setToast] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error" | "warning" | "info";
+    confirm?: boolean;
+    onConfirm?: (() => void) | undefined;
+  }>({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
-  // Ekle
+  // İlk yüklemede localStorage'dan oku
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = window.localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          setCustomers(JSON.parse(saved));
+        } catch {
+          setCustomers([]);
+        }
+      } else {
+        setCustomers([
+          {
+            id: 1,
+            name: "Yunis",
+            surname: "Polatgil",
+            email: "jejuwoodamz@gmail.com",
+            phone: "05307947958",
+            type: "bireysel",
+          }
+        ]);
+      }
+      setLoading(false);
+    }
+  }, []);
+
+  // Her değişimde localStorage'a yaz
+  useEffect(() => {
+    if (!loading && typeof window !== "undefined") {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(customers));
+    }
+  }, [customers, loading]);
+
   const handleAdd = () => {
     setSelectedCustomer(undefined);
     setDialogOpen(true);
   };
 
-  // Düzenle
-  const handleEdit = (customer: Customer) => {
+  const handleDetail = (customer: Customer) => {
     setSelectedCustomer(customer);
     setDialogOpen(true);
   };
 
-  // Kaydet (ekle veya düzenle)
   const handleSave = (
     data: {
       name: string;
@@ -78,136 +110,126 @@ const MusterilerPage = () => {
             : c
         )
       );
-      setNotif({ open: true, message: "Müşteri güncellendi.", severity: "success" });
+      setToast({
+        open: true,
+        message: "Müşteri güncellendi.",
+        severity: "success",
+      });
     } else {
       const newCustomer: Customer = {
         id: customers.length > 0 ? Math.max(...customers.map((c) => c.id)) + 1 : 1,
         ...data,
       };
       setCustomers((prev) => [...prev, newCustomer]);
-      setNotif({ open: true, message: "Müşteri eklendi.", severity: "success" });
+      setToast({
+        open: true,
+        message: "Müşteri eklendi.",
+        severity: "success",
+      });
     }
     setDialogOpen(false);
   };
 
-  // Sil
-  const handleDelete = () => {
+  const handleDeleteAsk = () => {
+    setToast({
+      open: true,
+      message: "Bu müşteriyi silmek istediğinize emin misiniz?",
+      severity: "warning",
+      confirm: true,
+      onConfirm: handleDeleteConfirmed,
+    });
+  };
+
+  const handleDeleteConfirmed = () => {
     if (selectedCustomer) {
       setCustomers((prev) => prev.filter((c) => c.id !== selectedCustomer.id));
-      setNotif({ open: true, message: "Müşteri silindi.", severity: "info" });
+      setToast({
+        open: true,
+        message: "Müşteri silindi.",
+        severity: "info",
+      });
       setDialogOpen(false);
+      setSelectedCustomer(undefined);
     }
   };
 
   return (
-    <Box sx={{ p: { xs: 1, sm: 4 } }}>
-      {/* Başlık ve Ekle Butonu */}
-      <Box
+    <Box sx={{ p: { xs: 1, md: 4 }, width: "100%" }}>
+      <Card
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          mb: 2,
+          borderRadius: 5,
+          boxShadow: "none",
+          background: theme.palette.mode === "dark" ? "#2d2f45" : "#fff",
+          p: 0,
+          maxWidth: 1150,
+          mx: "auto",
         }}
       >
-        <Box>
-          <Typography variant="h4" gutterBottom>
-            Müşteri Yönetimi
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Müşterilerinizi yönetin, ekleyin, düzenleyin veya silin.
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          onClick={handleAdd}
+        <CardContent
           sx={{
-            minWidth: 140,
-            fontWeight: 600,
+            p: { xs: 2, sm: 4 },
+            pb: { xs: 2, sm: 3 },
           }}
         >
-          Müşteri Ekle
-        </Button>
-      </Box>
-
-      {/* Tablo */}
-      <TableContainer
-        component={Paper}
-        sx={{
-          background: theme.palette.background.paper,
-          borderRadius: 3,
-          boxShadow: "none",
-        }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
-                Ad
-              </TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
-                Soyad
-              </TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
-                E-posta
-              </TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
-                Telefon
-              </TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
-                Tip
-              </TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
-                İşlemler
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {customers.map((c) => (
-              <TableRow key={c.id} hover>
-                <TableCell sx={{ color: theme.palette.text.primary }}>{c.name}</TableCell>
-                <TableCell sx={{ color: theme.palette.text.primary }}>{c.surname}</TableCell>
-                <TableCell sx={{ color: theme.palette.text.primary }}>{c.email}</TableCell>
-                <TableCell sx={{ color: theme.palette.text.primary }}>{c.phone}</TableCell>
-                <TableCell sx={{ color: theme.palette.text.primary, textTransform: "capitalize" }}>
-                  {c.type}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    color="primary"
-                    size="small"
-                    onClick={() => handleEdit(c)}
-                    sx={{
-                      color: theme.palette.mode === "dark" ? "#ffb400" : theme.palette.primary.main,
-                      fontWeight: 600,
-                      minWidth: 0,
-                      p: 0,
-                      mr: 2,
-                    }}
-                  >
-                    Düzenle
-                  </Button>
-                  <Button
-                    color="error"
-                    size="small"
-                    onClick={() => { setSelectedCustomer(c); setDialogOpen(true); }}
-                    sx={{ fontWeight: 600, minWidth: 0, p: 0 }}
-                  >
-                    Sil
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-            {customers.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ color: theme.palette.text.secondary }}>
-                  Hiç müşteri yok.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          {/* Başlık ve Ekle Butonu */}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ xs: "flex-start", sm: "center" }}
+            justifyContent="space-between"
+            spacing={2}
+            sx={{ mb: 2, pb: 2 }}
+          >
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  color: theme.palette.text.primary,
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                  mb: 0.2
+                }}
+              >
+                Müşteri Yönetimi
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.text.secondary,
+                  fontWeight: 400,
+                }}
+              >
+                Müşterilerinizi yönetin, ekleyin, düzenleyin veya silin.
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAdd}
+              startIcon={<AddIcon />}
+              sx={{
+                minWidth: 140,
+                fontWeight: 600,
+                px: 3,
+                py: 1.2,
+                fontSize: 14,
+                // background ve color kaldırıldı, tema üzerinden gelecek
+                boxShadow: "0 1px 7px 0 #0001",
+              }}
+            >
+              Müşteri Ekle
+            </Button>
+          </Stack>
+          <Divider sx={{ mb: 0, borderColor: theme.palette.divider, opacity: 0.6 }} />
+          {/* Tablo yükleniyor göstergesi */}
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", my: 6 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <MusteriTablosu customers={customers} onDetail={handleDetail} />
+          )}
+        </CardContent>
+      </Card>
 
       {/* Modal */}
       <AddEditAddress
@@ -226,22 +248,21 @@ const MusterilerPage = () => {
             : undefined
         }
         onSave={handleSave}
-        onDelete={selectedCustomer ? handleDelete : undefined}
+        onDelete={selectedCustomer ? handleDeleteAsk : undefined}
       />
 
-      {/* Bildirim */}
-      <Snackbar
-        open={notif.open}
-        autoHideDuration={4000}
-        onClose={() => setNotif({ ...notif, open: false })}
-      >
-        <Alert
-          onClose={() => setNotif({ ...notif, open: false })}
-          severity={notif.severity as any}
-        >
-          {notif.message}
-        </Alert>
-      </Snackbar>
+      {/* Toast */}
+      <CustomToast
+        open={toast.open}
+        onClose={() => setToast({ ...toast, open: false })}
+        message={toast.message}
+        severity={toast.severity}
+        confirm={toast.confirm}
+        onConfirm={toast.onConfirm}
+        confirmText="Evet, Sil"
+        cancelText="Vazgeç"
+        sound ={true}// veya sound={false} (istersen kapatabilirsin)
+      />
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -7,9 +7,10 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import { useTheme } from "@mui/material/styles";
+
+// Vuexy CustomInputHorizontal
 import CustomInputHorizontal from "@core/components/custom-inputs/Horizontal";
 import type { CustomInputHorizontalData } from "@core/components/custom-inputs/types";
 
@@ -40,20 +41,21 @@ export type AddEditAddressProps = {
   onDelete?: () => void;
 };
 
-const customerTypeOptions: CustomInputHorizontalData[] = [
+// Müşteri tipi için Vuexy tarzı radio kart verisi
+const radioData: CustomInputHorizontalData[] = [
   {
-    meta: "",
+    meta: "Bireysel müşteri işlemleri için",
     title: "Bireysel",
     value: "bireysel",
     isSelected: true,
-    content: "Bireysel müşteri işlemleri için",
+    content: ""
   },
   {
-    meta: "",
+    meta: "Kurumsal müşteri işlemleri için",
     title: "Kurumsal",
     value: "kurumsal",
-    content: "Kurumsal müşteri işlemleri için",
-  },
+    content: ""
+  }
 ];
 
 const AddEditAddress: React.FC<AddEditAddressProps> = ({
@@ -61,48 +63,52 @@ const AddEditAddress: React.FC<AddEditAddressProps> = ({
                                                          setOpen,
                                                          data,
                                                          onSave,
-                                                         onDelete,
+                                                         onDelete
                                                        }) => {
   const theme = useTheme();
+
+  // Modal içinde radio kartlar için state
+  const [selectedType, setSelectedType] = useState<string>(
+    data?.type || radioData.find(x => x.isSelected)?.value || "bireysel"
+  );
 
   const [addressData, setAddressData] = useState<AddEditAddressData>({
     firstName: "",
     lastName: "",
     email: "",
     landmark: "",
-    type: "bireysel",
-    companyName: "",
+    type: selectedType as "bireysel" | "kurumsal",
+    companyName: ""
   });
 
   useEffect(() => {
-    if (data)
-      setAddressData({ ...data, type: data.type ?? "bireysel" });
-    else
-      setAddressData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        landmark: "",
-        type: "bireysel",
-        companyName: "",
-      });
-  }, [data, open]);
+    setSelectedType(data?.type || radioData.find(x => x.isSelected)?.value || "bireysel");
+    setAddressData({
+      firstName: data?.firstName || "",
+      lastName: data?.lastName || "",
+      email: data?.email || "",
+      landmark: data?.landmark || "",
+      type: selectedType as "bireysel" | "kurumsal",
+      companyName: data?.companyName || ""
+    });
+  }, [open, data]);
 
-  const handleTypeChange = (value: string | React.ChangeEvent<HTMLInputElement>) => {
-    const typeValue = typeof value === "string" ? value : value.target.value;
-    setAddressData((prev) => ({
+  // Radio (kart) değişince tipi hem adresData hem de local state'te güncelle
+  const handleTypeChange = (type: string) => {
+    setSelectedType(type);
+    setAddressData(prev => ({
       ...prev,
-      type: typeValue as "bireysel" | "kurumsal",
-      companyName: typeValue === "kurumsal" ? prev.companyName : "",
+      type: type as "bireysel" | "kurumsal",
+      companyName: type === "kurumsal" ? prev.companyName : ""
     }));
   };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setAddressData((prev) => ({
+    setAddressData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value
     }));
   };
 
@@ -118,7 +124,7 @@ const AddEditAddress: React.FC<AddEditAddressProps> = ({
         companyName:
           addressData.type === "kurumsal"
             ? addressData.companyName
-            : undefined,
+            : undefined
       },
       data ? "edit" : "add"
     );
@@ -134,42 +140,27 @@ const AddEditAddress: React.FC<AddEditAddressProps> = ({
         sx: {
           borderRadius: 4,
           bgcolor: theme.palette.background.paper,
-          color: theme.palette.text.primary,
-        },
+          color: theme.palette.text.primary
+        }
       }}
     >
       <DialogTitle sx={{ pb: 0, fontWeight: 700 }}>
         {data ? "Müşteri Düzenle" : "Yeni Müşteri Ekle"}
       </DialogTitle>
       <DialogContent sx={{ pt: 2 }}>
-        {/* Custom Horizontal Radios */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
-          {customerTypeOptions.map((item, index) => (
-            <Grid item xs={6} key={index}>
-              <CustomInputHorizontal
-                type="radio"
-                data={item}
-                selected={addressData.type ?? ""}
-                name="customer-type"
-                handleChange={handleTypeChange}
-                gridProps={{}}
-                sx={{
-                  borderRadius: 2,
-                  border:
-                    addressData.type === item.value
-                      ? `2px solid ${theme.palette.primary.main}`
-                      : `1px solid ${theme.palette.divider}`,
-                  background: theme.palette.background.paper,
-                  boxShadow:
-                    addressData.type === item.value
-                      ? `0 0 0 2px ${theme.palette.primary.main}33`
-                      : "none",
-                }}
-              />
-            </Grid>
+          {radioData.map((item, index) => (
+            <CustomInputHorizontal
+              type="radio"
+              key={index}
+              data={item}
+              selected={selectedType}
+              name="custom-radios-customer-type"
+              handleChange={(value) => handleTypeChange(typeof value === "string" ? value : (value.target?.value ?? ""))}
+              gridProps={{ xs: 12, sm: 6 }}
+            />
           ))}
         </Grid>
-
         <Stack gap={2}>
           <TextField
             label="Ad"
@@ -185,8 +176,8 @@ const AddEditAddress: React.FC<AddEditAddressProps> = ({
               sx: {
                 color: theme.palette.text.primary,
                 bgcolor: theme.palette.background.paper,
-                borderRadius: 2,
-              },
+                borderRadius: 2
+              }
             }}
           />
           <TextField
@@ -203,8 +194,8 @@ const AddEditAddress: React.FC<AddEditAddressProps> = ({
               sx: {
                 color: theme.palette.text.primary,
                 bgcolor: theme.palette.background.paper,
-                borderRadius: 2,
-              },
+                borderRadius: 2
+              }
             }}
           />
           <TextField
@@ -221,8 +212,8 @@ const AddEditAddress: React.FC<AddEditAddressProps> = ({
               sx: {
                 color: theme.palette.text.primary,
                 bgcolor: theme.palette.background.paper,
-                borderRadius: 2,
-              },
+                borderRadius: 2
+              }
             }}
           />
           <TextField
@@ -238,11 +229,11 @@ const AddEditAddress: React.FC<AddEditAddressProps> = ({
               sx: {
                 color: theme.palette.text.primary,
                 bgcolor: theme.palette.background.paper,
-                borderRadius: 2,
-              },
+                borderRadius: 2
+              }
             }}
           />
-          {addressData.type === "kurumsal" && (
+          {selectedType === "kurumsal" && (
             <TextField
               label="Şirket Adı"
               name="companyName"
@@ -257,8 +248,8 @@ const AddEditAddress: React.FC<AddEditAddressProps> = ({
                 sx: {
                   color: theme.palette.text.primary,
                   bgcolor: theme.palette.background.paper,
-                  borderRadius: 2,
-                },
+                  borderRadius: 2
+                }
               }}
             />
           )}
@@ -278,7 +269,7 @@ const AddEditAddress: React.FC<AddEditAddressProps> = ({
           variant="contained"
           onClick={handleSave}
           sx={{
-            fontWeight: 700,
+            fontWeight: 700
           }}
         >
           Kaydet
