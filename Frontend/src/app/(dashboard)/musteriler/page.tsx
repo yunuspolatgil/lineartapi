@@ -1,169 +1,244 @@
 "use client";
-import { useEffect, useState } from "react";
-import { DataGrid, GridColDef, GridActionsCellItem } from "@mui/x-data-grid";
-import { fetchCustomers, createCustomer, updateCustomer, deleteCustomer, Customer } from "./api";
-import AddEditAddress from "@/components/dialogs/musteri-ekle";
-import { Button, Snackbar, Alert, Typography, Box, CircularProgress, useTheme } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 
-// En yukarıya ekle
-const localeText = {
-  noRowsLabel: 'Kayıt yok',
-  columnMenuLabel: 'Menü',
-  columnMenuShowColumns: 'Kolonları Göster',
-  columnMenuFilter: 'Filtrele',
-  columnMenuHideColumn: 'Kolonu Gizle',
-  columnMenuUnsort: 'Sıralamayı kaldır',
-  columnMenuSortAsc: 'Artan sırala',
-  columnMenuSortDesc: 'Azalan sırala',
-  // İstersen daha fazlasını ekleyebilirsin!
+import React, { useState } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  Snackbar,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  useTheme,
+} from "@mui/material";
+import AddEditAddress, { AddEditAddressData } from "@/components/dialogs/musteri-ekle";
+
+type Customer = {
+  id: number;
+  name: string;
+  surname: string;
+  email?: string;
+  phone: string;
+  type?: "bireysel" | "kurumsal";
+  companyName?: string;
 };
 
-
 const MusterilerPage = () => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [notif, setNotif] = useState<{ open: boolean; message: string; severity: "success" | "error"}>({open: false, message: "", severity: "success"});
-
   const theme = useTheme();
 
-  const getList = async () => {
-    setLoading(true);
-    try {
-      const data = await fetchCustomers();
-      setCustomers(data);
-    } catch {
-      setNotif({open: true, message: "Müşteriler yüklenemedi.", severity: "error"});
-    } finally {
-      setLoading(false);
-    }
-  };
+  // CRUD state
+  const [customers, setCustomers] = useState<Customer[]>([
+    {
+      id: 1,
+      name: "Yunis",
+      surname: "Polatgil",
+      email: "jejuwoodamz@gmail.com",
+      phone: "05307947958",
+      type: "bireysel",
+    },
+  ]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | undefined>();
+  const [notif, setNotif] = useState({ open: false, message: "", severity: "success" });
 
-  useEffect(() => { getList(); }, []);
-
+  // Ekle
   const handleAdd = () => {
-    setSelectedCustomer(null);
+    setSelectedCustomer(undefined);
     setDialogOpen(true);
   };
 
+  // Düzenle
   const handleEdit = (customer: Customer) => {
     setSelectedCustomer(customer);
     setDialogOpen(true);
   };
 
-  const handleSave = async (
-    data: { name: string; surname: string; email: string; phone: string },
-    type: string
-  ) => {
-    try {
-      if (!data.email) {
-        setNotif({ open: true, message: "E-posta zorunludur.", severity: "error" });
-        return;
-      }
-      if (selectedCustomer) {
-        await updateCustomer(selectedCustomer.id, data);
-        setNotif({open: true, message: "Müşteri güncellendi.", severity: "success"});
-      } else {
-        await createCustomer(data);
-        setNotif({open: true, message: "Müşteri eklendi.", severity: "success"});
-      }
-      setDialogOpen(false);
-      getList();
-    } catch {
-      setNotif({open: true, message: "Hata oluştu.", severity: "error"});
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      if (selectedCustomer) {
-        await deleteCustomer(selectedCustomer.id);
-        setNotif({open: true, message: "Müşteri silindi.", severity: "success"});
-        setDialogOpen(false);
-        getList();
-      }
-    } catch {
-      setNotif({open: true, message: "Silme sırasında hata oluştu.", severity: "error"});
-    }
-  };
-
-  const columns: GridColDef[] = [
-    { field: "name", headerName: "Ad", flex: 1 },
-    { field: "surname", headerName: "Soyad", flex: 1 },
-    { field: "email", headerName: "E-posta", flex: 1 },
-    { field: "phone", headerName: "Telefon", flex: 1 },
-    { field: "createdAt", headerName: "Oluşturulma", flex: 1,
-      valueFormatter: ({ value }) => value ? new Date(value).toLocaleString("tr-TR") : ""
+  // Kaydet (ekle veya düzenle)
+  const handleSave = (
+    data: {
+      name: string;
+      surname: string;
+      email?: string;
+      phone: string;
+      type: "bireysel" | "kurumsal";
+      companyName?: string;
     },
-    {
-      field: "actions",
-      type: "actions",
-      headerName: "İşlemler",
-      getActions: (params) => [
-        <GridActionsCellItem icon={<EditIcon />} label="Düzenle" onClick={() => handleEdit(params.row)} />,
-        <GridActionsCellItem icon={<DeleteIcon color="error" />} label="Sil" onClick={() => {setSelectedCustomer(params.row); setDialogOpen(true);}} />
-      ],
-      flex: 1,
+    formType: string
+  ) => {
+    if (selectedCustomer) {
+      setCustomers((prev) =>
+        prev.map((c) =>
+          c.id === selectedCustomer.id
+            ? { ...c, ...data }
+            : c
+        )
+      );
+      setNotif({ open: true, message: "Müşteri güncellendi.", severity: "success" });
+    } else {
+      const newCustomer: Customer = {
+        id: customers.length > 0 ? Math.max(...customers.map((c) => c.id)) + 1 : 1,
+        ...data,
+      };
+      setCustomers((prev) => [...prev, newCustomer]);
+      setNotif({ open: true, message: "Müşteri eklendi.", severity: "success" });
     }
-  ];
+    setDialogOpen(false);
+  };
+
+  // Sil
+  const handleDelete = () => {
+    if (selectedCustomer) {
+      setCustomers((prev) => prev.filter((c) => c.id !== selectedCustomer.id));
+      setNotif({ open: true, message: "Müşteri silindi.", severity: "info" });
+      setDialogOpen(false);
+    }
+  };
 
   return (
-    <Box sx={{
-      p: { xs: 1, sm: 3 },
-      height: "calc(100vh - 150px)",
-      bgcolor: theme.palette.background.paper,
-      borderRadius: 2,
-      "& .MuiDataGrid-root": { bgcolor: theme.palette.background.default }
-    }}>
-      <Typography variant="h4" gutterBottom>Müşteriler</Typography>
-      <Button variant="contained" onClick={handleAdd} sx={{ mb: 2 }}>Müşteri Ekle</Button>
-      {loading ? (
-        <CircularProgress />
-      ) : (
-        <DataGrid
-          rows={customers}
-          columns={columns}
-          autoHeight
+    <Box sx={{ p: { xs: 1, sm: 4 } }}>
+      {/* Başlık ve Ekle Butonu */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 2,
+        }}
+      >
+        <Box>
+          <Typography variant="h4" gutterBottom>
+            Müşteri Yönetimi
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Müşterilerinizi yönetin, ekleyin, düzenleyin veya silin.
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          onClick={handleAdd}
           sx={{
-            bgcolor: theme.palette.background.default,
-            color: theme.palette.text.primary,
-            borderRadius: 2,
-            "& .MuiDataGrid-columnHeaders": {
-              bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[900] : theme.palette.grey[300],
-              color: theme.palette.text.primary,
-            },
-            "& .MuiDataGrid-row": {
-              bgcolor: theme.palette.background.paper,
-            },
-            "& .MuiDataGrid-cell": {
-              borderColor: theme.palette.divider,
-            },
+            minWidth: 140,
+            fontWeight: 600,
           }}
-          paginationModel={{ pageSize: 10, page: 0 }}
-          onPaginationModelChange={(model) => console.log(model)}
-          rowHeight={48}
-          localeText={localeText}  // ← BURAYI EKLE!
-          getRowId={(row) => row.id}
-        />
-      )}
+        >
+          Müşteri Ekle
+        </Button>
+      </Box>
 
+      {/* Tablo */}
+      <TableContainer
+        component={Paper}
+        sx={{
+          background: theme.palette.background.paper,
+          borderRadius: 3,
+          boxShadow: "none",
+        }}
+      >
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
+                Ad
+              </TableCell>
+              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
+                Soyad
+              </TableCell>
+              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
+                E-posta
+              </TableCell>
+              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
+                Telefon
+              </TableCell>
+              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
+                Tip
+              </TableCell>
+              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
+                İşlemler
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {customers.map((c) => (
+              <TableRow key={c.id} hover>
+                <TableCell sx={{ color: theme.palette.text.primary }}>{c.name}</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary }}>{c.surname}</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary }}>{c.email}</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary }}>{c.phone}</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, textTransform: "capitalize" }}>
+                  {c.type}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    color="primary"
+                    size="small"
+                    onClick={() => handleEdit(c)}
+                    sx={{
+                      color: theme.palette.mode === "dark" ? "#ffb400" : theme.palette.primary.main,
+                      fontWeight: 600,
+                      minWidth: 0,
+                      p: 0,
+                      mr: 2,
+                    }}
+                  >
+                    Düzenle
+                  </Button>
+                  <Button
+                    color="error"
+                    size="small"
+                    onClick={() => { setSelectedCustomer(c); setDialogOpen(true); }}
+                    sx={{ fontWeight: 600, minWidth: 0, p: 0 }}
+                  >
+                    Sil
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+            {customers.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ color: theme.palette.text.secondary }}>
+                  Hiç müşteri yok.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Modal */}
       <AddEditAddress
         open={dialogOpen}
         setOpen={setDialogOpen}
-        data={selectedCustomer ? {
-          firstName: selectedCustomer.name,
-          lastName: selectedCustomer.surname,
-          email: selectedCustomer.email,
-          landmark: selectedCustomer.phone
-        } : undefined}
+        data={
+          selectedCustomer
+            ? {
+              firstName: selectedCustomer.name,
+              lastName: selectedCustomer.surname,
+              email: selectedCustomer.email,
+              landmark: selectedCustomer.phone,
+              type: selectedCustomer.type,
+              companyName: selectedCustomer.companyName,
+            }
+            : undefined
+        }
         onSave={handleSave}
         onDelete={selectedCustomer ? handleDelete : undefined}
       />
-      <Snackbar open={notif.open} autoHideDuration={4000} onClose={() => setNotif({...notif, open: false})}>
-        <Alert onClose={() => setNotif({...notif, open: false})} severity={notif.severity} sx={{ width: '100%' }}>
+
+      {/* Bildirim */}
+      <Snackbar
+        open={notif.open}
+        autoHideDuration={4000}
+        onClose={() => setNotif({ ...notif, open: false })}
+      >
+        <Alert
+          onClose={() => setNotif({ ...notif, open: false })}
+          severity={notif.severity as any}
+        >
           {notif.message}
         </Alert>
       </Snackbar>

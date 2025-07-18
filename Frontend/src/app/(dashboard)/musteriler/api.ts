@@ -2,11 +2,13 @@ import axios from "axios";
 
 export interface Customer {
   id: number;
-  name: string;
-  surname: string;
-  email: string;
-  phone: string;
-  createdAt: string;
+  name?: string;
+  surname?: string;
+  email?: string;
+  phone?: string;
+  type?: string;
+  companyName?: string;
+  createdAt?: string;
 }
 
 const API_URL = "https://localhost:44354/api/customers";
